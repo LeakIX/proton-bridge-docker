@@ -41,11 +41,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates=20250419 \
     pass=1.7.4-7 \
     gnupg=2.4.7-21+deb13u1 \
+    libfido2-1 \
+    libcbor0.10 \
+    libsecret-1-0=0.21.7-1 \
     && rm -rf /var/lib/apt/lists/*
 
 COPY --from=builder /src/bridge /usr/local/bin/proton-bridge
 
-RUN useradd -m -s /bin/bash proton
+RUN useradd -m -s /bin/bash proton \
+    && mkdir -p /home/proton/.config /home/proton/.gnupg \
+        /home/proton/.password-store \
+    && chown -R proton:proton /home/proton/.config \
+        /home/proton/.gnupg /home/proton/.password-store \
+    && chmod 700 /home/proton/.gnupg
 
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
